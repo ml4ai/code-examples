@@ -168,7 +168,7 @@ def main():
     args = parser.parse_args()
 
     if args.gen_output_timestamp:
-        output_root = os.path.join(args.output_root, f'xor_{get_timestamp()}')
+        output_root = os.path.join(args.output_root, f'xor_results_{get_timestamp()}')
     else:
         output_root = args.output_root
 
