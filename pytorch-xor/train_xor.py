@@ -158,13 +158,21 @@ def plot(loss_values, accuracy_values, save_file=None, show_p=False):
 
 def main():
 
+    # process script arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--iterations', type=int, default=100)
-    parser.add_argument('--learning-rate', type=float, default=1.0)
-    parser.add_argument('--data-file', default='xor.txt')
-    parser.add_argument('--output-root', default='')
-    parser.add_argument('--gen-output-timestamp', default=True)
-    parser.add_argument('--save-model', default=True)
+    parser.add_argument('--iterations', type=int, default=100,
+                        help='Number of training iterations.')
+    parser.add_argument('--learning-rate', type=float, default=1.0,
+                        help='Learning rate.')
+    parser.add_argument('--data-file', default='xor.txt',
+                        help='Path to data file.')
+    parser.add_argument('--output-root', default='',
+                        help='Path to root of output results directory.')
+    parser.add_argument('--gen-output-timestamp', default=True,
+                        help='Flag for whether to generate the output results '
+                             'directory with a unique timestamp.')
+    parser.add_argument('--save-model', default=True,
+                        help='Flag for whether to save the generated model.')
     args = parser.parse_args()
 
     if args.gen_output_timestamp:
