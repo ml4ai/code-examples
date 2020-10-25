@@ -12,19 +12,27 @@ from pathlib import Path
 # Utilities
 # -----------------------------------------------------------------------------
 
-def get_timestamp(verbose=False):
+def get_timestamp(verbose=False, short=False):
     now = datetime.datetime.now()
     if verbose:
-        return f'y={now.year:04d},m={now.month:02d},d={now.day:02d}' \
-               f'_h={now.hour:02d},m={now.minute:02d},s={now.second:02d},mu={now.microsecond:06d}'
+        if short:
+            return f'{now.hour:02d}:{now.minute:02d}:{now.second:02d}'
+        else:
+            return f'y={now.year:04d},m={now.month:02d},d={now.day:02d}' \
+                   f'_h={now.hour:02d},m={now.minute:02d},s={now.second:02d},' \
+                   f'mu={now.microsecond:06d}'
     else:
-        return f'{now.year:04d}{now.month:02d}{now.day:02d}' \
-               f'_{now.hour:02d}{now.minute:02d}{now.second:02d}{now.microsecond:06d}'
+        if short:
+            return f'{now.hour:02d}{now.minute:02d}{now.second:02d}'
+        else:
+            return f'{now.year:04d}{now.month:02d}{now.day:02d}' \
+                   f'_{now.hour:02d}{now.minute:02d}{now.second:02d}' \
+                   f'{now.microsecond:06d}'
 
 
 def write_to_log(log_file, msg):
     with open(log_file, 'a') as logf:
-        logf.write(f'{msg}\n')
+        logf.write(f'[{get_timestamp(verbose=True,short=True)}] {msg}\n')
 
 
 # -----------------------------------------------------------------------------
@@ -158,17 +166,25 @@ def plot(loss_values, accuracy_values, save_file=None, show_p=False):
 
 def main():
 
+    # process script arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--iterations', type=int, default=100)
-    parser.add_argument('--learning-rate', type=float, default=1.0)
-    parser.add_argument('--data-file', default='xor.txt')
-    parser.add_argument('--output-root', default='')
-    parser.add_argument('--gen-output-timestamp', default=True)
-    parser.add_argument('--save-model', default=True)
+    parser.add_argument('--iterations', type=int, default=100,
+                        help='number of training iterations.')
+    parser.add_argument('--learning-rate', type=float, default=1.0,
+                        help='learning rate.')
+    parser.add_argument('--data-file', default='xor.txt',
+                        help='path to data file.')
+    parser.add_argument('--output-root', default='xor_results',
+                        help='path to root of output results directory.')
+    parser.add_argument('--gen-output-timestamp', action='store_true',
+                        help='flag for whether to generate the output results '
+                             'directory with a unique timestamp.')
+    parser.add_argument('--save-model', action='store_true',
+                        help='flag for whether to save the generated model.')
     args = parser.parse_args()
 
     if args.gen_output_timestamp:
-        output_root = os.path.join(args.output_root, f'xor_results_{get_timestamp()}')
+        output_root = os.path.join(args.output_root, f'_{get_timestamp()}')
     else:
         output_root = args.output_root
 
@@ -178,6 +194,7 @@ def main():
     log_file = os.path.join(output_root, 'log.txt')
     plot_file = os.path.join(output_root, 'train_xor_plot.png')
 
+    write_to_log(log_file, f'[{get_timestamp(verbose=True)}]')
     write_to_log(log_file, 'XOR training script START')
 
     model, loss_values, accuracy_values = \
@@ -191,6 +208,7 @@ def main():
     plot(loss_values, accuracy_values, save_file=plot_file)
 
     write_to_log(log_file, 'XOR training script DONE.')
+    write_to_log(log_file, f'[{get_timestamp(verbose=True)}]')
 
 
 # -----------------------------------------------------------------------------
