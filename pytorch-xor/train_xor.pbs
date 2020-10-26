@@ -29,8 +29,8 @@ CONTAINER=/groups/claytonm/containers/torch-base_latest.sif
 ### NOTE: You must update the SCRIPT_PATH to your context
 SCRIPT_ROOT=/home/u25/claytonm/projects/code-examples/pytorch-xor
 DATA_ROOT=/xdisk/claytonm/projects/code-examples/pytorch-xor
-OUTPUT_ROOT=DATA_ROOT
+OUTPUT_ROOT=$DATA_ROOT
 
 ### Run commands in the singularity container using exec.
-cd SCRIPT_ROOT
-singularity exec $CONTAINER python3 train_xor.py --data-file=DATA_ROOT --output-root=OUTPUT_ROOT --gen-output-timestamp --save-model
+cd $SCRIPT_ROOT
+singularity exec $CONTAINER python3 train_xor.py --data-file=$DATA_ROOT --output-root=$OUTPUT_ROOT --gen-output-timestamp --save-model
