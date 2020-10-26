@@ -1,6 +1,6 @@
 import argparse
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+#import matplotlib.pyplot as plt
+#from matplotlib.ticker import MaxNLocator
 import numpy
 import torch
 import datetime
@@ -179,6 +179,7 @@ def train_xor(data, learning_rate, iterations, log_file):
 # Plot
 # -----------------------------------------------------------------------------
 
+'''
 def plot(loss_values: list, accuracy_values: list,
          save_file: typing.Optional[str] = None,
          show_p: bool = False) -> None:
@@ -214,6 +215,7 @@ def plot(loss_values: list, accuracy_values: list,
 
     if show_p:
         plt.show()
+'''
 
 
 # -----------------------------------------------------------------------------
