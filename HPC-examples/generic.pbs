@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -l select=1:ncpus=1:mem=8gb:pcmem=8gb:np100s=1
+#PBS -q standard
+#PBS -N <script-name>
+#PBS -W group_list=claytonm
+#PBS -l place=pack:shared
+#PBS -l cput=0:30:00
+#PBS -l walltime=0:30:00
+#PBS -j oe
+
+module load singularity/3/3.6.3
+CONTAINER=/<path-to-singularity-containers>/<name-of-singularity-image>.simg
+
+cd /home/u12/<user-netid>/<path-to-python-script>
+singularity exec --nv $CONTAINER python3.6 <script-name>.py --input-file /xdisk/claytonm/<some-project>/<some-data>.csv --output-file /xdisk/claytonm/<some-project>/results.txt [<additional-args>]
