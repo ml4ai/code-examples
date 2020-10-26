@@ -4,7 +4,7 @@
 ### PART 1: Requests resources to run your job.
 # --------------------------------------------------------------
 ### Set the job name (needed for job lookup)
-#PBS -N xor_hello_world
+#PBS -N pytorch_xor
 ### Specify the PI group for this job (always claytonm)
 #PBS -W group_list=claytonm
 ### Set the queue for your job (options: windfall, standard, high_priority, debug -- only on Ocelote)
@@ -26,13 +26,11 @@ module load singularity/3.6.4
 ### Define path to singularity image that we will use for running commands
 CONTAINER=/groups/claytonm/containers/torch-base_latest.sif
 
-### Run commands in the singularity container using exec.
-
 ### NOTE: You must update the SCRIPT_PATH to your context
-SCRIPT_PATH=/home/u25/claytonm/projects/code-examples/pytorch-xor
+SCRIPT_ROOT=/home/u25/claytonm/projects/code-examples/pytorch-xor
+DATA_ROOT=/xdisk/claytonm/projects/code-examples/pytorch-xor
+OUTPUT_ROOT=DATA_ROOT
 
-cd SCRIPT_PATH
-singularity exec $CONTAINER python3 --version
-singularity exec $SING_IMG pip3 list
-singularity exec $SING_IMG touch /groups/claytonm/test_out_file.txt
-singularity exec $SING_IMG pdflatex -version
+### Run commands in the singularity container using exec.
+cd SCRIPT_ROOT
+singularity exec $CONTAINER python3 train_xor.py --data-file=DATA_ROOT --output-root=OUTPUT_ROOT --gen-output-timestamp --save-model
