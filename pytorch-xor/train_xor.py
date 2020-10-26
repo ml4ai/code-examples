@@ -6,13 +6,21 @@ import torch
 import datetime
 import os
 from pathlib import Path
+import typing
 
 
 # -----------------------------------------------------------------------------
 # Utilities
 # -----------------------------------------------------------------------------
 
-def get_timestamp(verbose=False, short=False):
+def get_timestamp(verbose: bool = False, short: bool = False) -> str:
+    """
+    Utility to generate timestamps. This is a bit hacky.
+    :param verbose: True generates timestamp with component annotations,
+                    otherwise concatenated numbers
+    :param short: True only includes hours, minutes and seconds
+    :return: string representation of the timestamp
+    """
     now = datetime.datetime.now()
     if verbose:
         if short:
@@ -30,7 +38,13 @@ def get_timestamp(verbose=False, short=False):
                    f'{now.microsecond:06d}'
 
 
-def write_to_log(log_file, msg):
+def write_to_log(log_file: str, msg: str) -> None:
+    """
+    Utility write a message string to time-stamped line in the log_file.
+    :param log_file: Path to log file
+    :param msg: string message
+    :return: None
+    """
     with open(log_file, 'a') as logf:
         logf.write(f'[{get_timestamp(verbose=True,short=True)}] {msg}\n')
 
@@ -39,7 +53,16 @@ def write_to_log(log_file, msg):
 # xor Helpers
 # -----------------------------------------------------------------------------
 
-def load_training_data(data_file):
+def load_training_data(data_file: str) -> list:
+    """
+    Helper to load training data from file.
+    Assumes data file formatted as csv with rows as follows:
+        <target>, <feature-1>, <feature-2>, ...
+    Creates data representation prepared for data_to_tensor_pair, as list of:
+        ([<feature-1>, <feature-2>, ... ], [<target>])
+    :param data_file: Filepath to data file
+    :return: Data
+    """
     # NOTE: torch expects float data;
     #       default numpy.loadtxt reads as float64,
     #       so specify dtype=numpy.single
@@ -48,6 +71,21 @@ def load_training_data(data_file):
     for i in range(raw.shape[0]):
         data.append((raw[i][1:].tolist(), [raw[i][0]]))
     return data
+
+
+def save_results(output_root: str, loss_values: list, accuracy_values: list) -> None:
+    """
+    Helper to save model training results to file.
+    Results file format per row:
+        <loss_value>, <accuracy_value>
+    :param output_root: Output root path
+    :param loss_values: list of model training loss_values
+    :param accuracy_values: list of model training accuracy_values
+    :return: None
+    """
+    results_file = os.path.join(output_root, 'results.csv')
+    results = numpy.array([loss_values, accuracy_values]).transpose()
+    numpy.savetxt(results_file, results, delimiter=',')
 
 
 def data_to_tensor_pair(data, device):
@@ -88,7 +126,15 @@ def construct_model(hidden_units, num_layers):
     return torch.nn.Sequential(*layers)
 
 
-def train_xor(data_path, learning_rate, iterations, log_file):
+def train_xor(data, learning_rate, iterations, log_file):
+    """
+
+    :param data:
+    :param learning_rate: Model learning rate
+    :param iterations: Number of training iteratiosn
+    :param log_file: Log file path
+    :return:
+    """
 
     if torch.cuda.is_available():
         write_to_log(log_file, 'CUDA is available -- using GPU')
@@ -98,7 +144,7 @@ def train_xor(data_path, learning_rate, iterations, log_file):
         device = torch.device('cpu')
 
     # Define our toy training data set for the XOR function.
-    training_data = data_to_tensor_pair(load_training_data(data_path), device)
+    training_data = data_to_tensor_pair(data, device)
 
     # Define our model. Use default initialization.
     model = construct_model(hidden_units=10, num_layers=2)
@@ -133,7 +179,17 @@ def train_xor(data_path, learning_rate, iterations, log_file):
 # Plot
 # -----------------------------------------------------------------------------
 
-def plot(loss_values, accuracy_values, save_file=None, show_p=False):
+def plot(loss_values: list, accuracy_values: list,
+         save_file: typing.Optional[str] = None,
+         show_p: bool = False) -> None:
+    """
+    Helper to plot the the loss and accuracy.
+    :param loss_values: Sequence of training loss values
+    :param accuracy_values: Sequence of model training accuracy values
+    :param save_file: Filepath to save image to (does not save if None, the default)
+    :param show_p: Flag for whether to show the image after rendering (default False)
+    :return: None
+    """
     # Plot loss and accuracy.
     fig, ax = plt.subplots()
     ax.set_title('Loss and Accuracy vs. Iterations')
@@ -164,7 +220,14 @@ def plot(loss_values, accuracy_values, save_file=None, show_p=False):
 # Main
 # -----------------------------------------------------------------------------
 
-def main():
+def main() -> None:
+    """
+    The top-level function to manage the experiment.
+    Processes the script arguments
+    Creates results root path (but throws error if already exists).
+    Writes to log message before and after each experiment step.
+    :return: None
+    """
 
     # process script arguments
     parser = argparse.ArgumentParser()
@@ -188,24 +251,36 @@ def main():
     else:
         output_root = args.output_root
 
-    # create output_root directory path if does not already exist
-    Path(output_root).mkdir(parents=True, exist_ok=True)
+    # create output_root directory path but throw error if it already exists
+    Path(output_root).mkdir(parents=True, exist_ok=False)
 
     log_file = os.path.join(output_root, 'log.txt')
-    plot_file = os.path.join(output_root, 'train_xor_plot.png')
 
     write_to_log(log_file, f'[{get_timestamp(verbose=True)}]')
     write_to_log(log_file, 'XOR training script START')
 
+    write_to_log(log_file, 'Loading training data')
+    data = load_training_data(args.data_file)
+    write_to_log(log_file, 'Loading training data DONE')
+
+    write_to_log(log_file, 'Train XOR')
     model, loss_values, accuracy_values = \
-        train_xor(args.data_file, args.learning_rate, args.iterations, log_file)
+        train_xor(data, args.learning_rate, args.iterations, log_file)
+    write_to_log(log_file, 'Train XOR DONE')
+
+    write_to_log(log_file, 'Saving results')
+    save_results(output_root, loss_values, accuracy_values)
+    write_to_log(log_file, 'Saving results DONE')
 
     if args.save_model is not None:
         model_dst_file = os.path.join(output_root, 'xor_model.pt')
         write_to_log(log_file, f'Saving model to {model_dst_file}')
         torch.save(model.state_dict(), model_dst_file)
+        write_to_log(log_file, 'Saving model DONE')
 
-    plot(loss_values, accuracy_values, save_file=plot_file)
+    # Plotting should be done as post-processing after HPC run
+    # plot_file = os.path.join(output_root, 'train_xor_plot.png')
+    # plot(loss_values, accuracy_values, save_file=plot_file)
 
     write_to_log(log_file, 'XOR training script DONE.')
     write_to_log(log_file, f'[{get_timestamp(verbose=True)}]')
