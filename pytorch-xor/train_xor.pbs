@@ -28,8 +28,8 @@ CONTAINER=/groups/claytonm/containers/torch-base_latest.sif
 
 ### NOTE: You must update the SCRIPT_PATH to your context
 SCRIPT_ROOT=/home/u25/claytonm/projects/code-examples/pytorch-xor
-DATA_ROOT=/xdisk/claytonm/projects/code-examples/pytorch-xor
-OUTPUT_ROOT=$DATA_ROOT
+DATA_ROOT=/xdisk/claytonm/projects/code-examples/pytorch-xor/xor.txt
+OUTPUT_ROOT=/xdisk/claytonm/projects/code-examples/pytorch-xor/results
 
 ### Run commands in the singularity container using exec.
 cd $SCRIPT_ROOT
