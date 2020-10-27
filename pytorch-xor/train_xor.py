@@ -276,7 +276,7 @@ def main() -> None:
 
     if args.save_model:
         model_dst_file = os.path.join(output_root, 'xor_model.pt')
-        write_to_log(log_file, f'Saving model to {model_dst_file}')
+        write_to_log(log_file, f'Saving model to: {model_dst_file}')
         torch.save(model.state_dict(), model_dst_file)
         write_to_log(log_file, 'Saving model DONE')
 
