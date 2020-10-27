@@ -83,7 +83,6 @@ def save_results(output_root: str, loss_values: list, accuracy_values: list) -> 
     :param accuracy_values: list of model training accuracy_values
     :return: None
     """
-    results_file = os.path.join(output_root, 'results.csv')
     results = numpy.array([loss_values, accuracy_values]).transpose()
     numpy.savetxt(results_file, results, delimiter=',')
 
@@ -239,7 +238,7 @@ def main() -> None:
                         help='learning rate.')
     parser.add_argument('--data-file', default='xor.txt',
                         help='path to data file.')
-    parser.add_argument('--output-root', default='xor_results',
+    parser.add_argument('--output-root', default='',
                         help='path to root of output results directory.')
     parser.add_argument('--gen-output-timestamp', action='store_true',
                         help='flag for whether to generate the output results '
@@ -261,7 +260,7 @@ def main() -> None:
     write_to_log(log_file, f'[{get_timestamp(verbose=True)}]')
     write_to_log(log_file, 'XOR training script START')
 
-    write_to_log(log_file, 'Loading training data')
+    write_to_log(log_file, f'Loading training data from: {args.data_file}')
     data = load_training_data(args.data_file)
     write_to_log(log_file, 'Loading training data DONE')
 
@@ -270,8 +269,9 @@ def main() -> None:
         train_xor(data, args.learning_rate, args.iterations, log_file)
     write_to_log(log_file, 'Train XOR DONE')
 
-    write_to_log(log_file, 'Saving results')
-    save_results(output_root, loss_values, accuracy_values)
+    results_file = os.path.join(output_root, 'results.csv')
+    write_to_log(log_file, f'Saving results to: {results_file}')
+    save_results(results_file, loss_values, accuracy_values)
     write_to_log(log_file, 'Saving results DONE')
 
     if args.save_model:
