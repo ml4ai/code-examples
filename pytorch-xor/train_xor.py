@@ -73,12 +73,12 @@ def load_training_data(data_file: str) -> list:
     return data
 
 
-def save_results(output_root: str, loss_values: list, accuracy_values: list) -> None:
+def save_results(results_file: str, loss_values: list, accuracy_values: list) -> None:
     """
     Helper to save model training results to file.
     Results file format per row:
         <loss_value>, <accuracy_value>
-    :param output_root: Output root path
+    :param results_file: File path for results file
     :param loss_values: list of model training loss_values
     :param accuracy_values: list of model training accuracy_values
     :return: None
